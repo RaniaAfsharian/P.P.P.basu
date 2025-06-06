@@ -41,9 +41,9 @@ void Hero::useAct(){
         Act_remaining=0;
     }
 }
-void Hero::send_hos(){//این قسمت رو شک دارم
+void Hero::send_hos(){
     in_hospital=true;
-    setHealth(50);
+    heal();
     Act_remaining=0;
 }
 void Hero::move(const std::string& newLoc){///حرکت به محل جدید
@@ -56,5 +56,19 @@ void Hero::move_valliger(std::shared_ptr <chara> villager , const std::string& n
     if(Act_remaining > 0 && villager->getType()==Typechara::VILLAGER){
         villager->setLoc(newLoc);
         useAct();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Mayor::Mayor():Hero("mo" , "Theater" , HeroType::Mayor)
+{}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Ancint::Ancint() : Hero("ASI" , "Docks" , HeroType::Ancint)
+{}
+
+void Ancint::takeSpcial_item(const std::string itemLoc , std::vector<std::string>& items){
+    if(getAct_rem()>0){
+        std::cout<<"Ancint has takeSpcial_item ..."<<std::endl;
     }
 }
