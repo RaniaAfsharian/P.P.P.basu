@@ -42,5 +42,16 @@ class Hero : public chara {
 */
 };
 
+class Mayor : public Hero{
+    public:
+    Mayor();
+};
+
+class Ancint : public Hero{
+    public:
+    Ancint();
+
+    void takeSpcial_item(const std::string itemLoc , std::vector<std::string>& items);
+};
 
 #endif
