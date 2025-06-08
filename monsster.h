@@ -4,30 +4,33 @@
 #include <bits/stdc++.h>
 
 #include "charactor.h"
-//#include "item.h"
+#include "Item.h"
 
-enum class MonsterType{INVISIDIE_MAN , DRACULA};
+
+enum class monsterType{ INVISIDIE_MAN , DRACULA };
 
 class Monster : public chara{
     private:
-    MonsterType Mtype;
+    monsterType Mtype;
     std::string Npower;
     bool is_defeated;
     std::vector<std::string> targetLoc;
-    //std::vector<item> items;
+    std::vector<Item> items;
     int power;
+    //MonsterCard monstercard;
 
 
     public:
-    Monster(const std::string& name , const std::string &loc , MonsterType Mtype , const std::string Npower , /*const std::vector<item> items ,*/ int power);
+    Monster(const std::string name , const std::string &loc , monsterType Mtype , const std::string Npower , const std::vector<Item> items , int power);
 
-    MonsterType getMtype()const;
+    monsterType getMtype()const;
     std::string getNpower()const;
     bool getIs_defeated()const;
     int getPower()const;
 
     const std::vector<std::string>& getTargetLoc()const;
-    //const std::vector<item>& getItems()const;
+    const std::vector<Item>& getItems()const;
+   // MonsterCard getMonstercard()const;
 
     void setPower(int npower);
     void addTargetLoc(std::string LOCC);
@@ -36,7 +39,7 @@ class Monster : public chara{
     virtual void useSpecialP()=0;
     virtual bool can_defeated()const=0;
 
-    //bool checkItem_defeat(const std::vector<std::shared_ptr<item>> &items) const;
+    bool checkItem_defeat(const std::vector<std::shared_ptr<Item>> &items) const;
 
     bool can_defend()const override;
  
@@ -75,4 +78,5 @@ class Invisidie_man : public Monster{
     void useSpecialP() override;
     bool can_defeated()const override;
 };
+
 #endif
