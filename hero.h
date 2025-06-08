@@ -6,6 +6,7 @@
 
 #include "charactor.h"
 #include "monster.h"
+#include "Item.h"
 
 
 enum class HeroType{Mayor , Ancint};
@@ -17,7 +18,7 @@ class Hero : public chara {
     int Act_remaining;
     bool in_hospital;
 
-    // std::vector<std::shared_ptr<item> >items;
+    std::vector<std::shared_ptr<Item> > item;
 
     public:
     Hero(const std::string& name , const std::string &loc , HeroType htype );
@@ -34,12 +35,11 @@ class Hero : public chara {
     void send_hos();
     void move(const std::string& newLoc);
     void move_valliger(std::shared_ptr <chara> villager , const std::string& newLoc);
+    void pickup_item( std::vector<std::shared_ptr<Item> > item);
+    void use_Item(const std::string& itemname);
+    void defeatMonster(std::shared_ptr <Monster> monster);
+    //void progress_inTask(std::shared_ptr <Monster> monster);
 
-
-/*مانستر رو مینویسم و کاملش میکنمم
-    void pickup_item(std::shared_ptr <item> items);
-    void progress(std::shared_ptr <)
-*/
 };
 
 class Mayor : public Hero{
@@ -53,5 +53,4 @@ class Ancint : public Hero{
 
     void takeSpcial_item(const std::string itemLoc , std::vector<std::string>& items);
 };
-
 #endif
