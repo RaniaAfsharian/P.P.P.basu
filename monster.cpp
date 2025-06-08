@@ -2,15 +2,13 @@
 
 #include "charactor.h"
 #include "monster.h"
-//#include "item.h"
+#include "Item.h"
 
-Monster::Monster(const std::string& name , const std::string &loc , MonsterType Mtype , const std::string Npower , /*const std::vector<item> items ,*/ int power ) :
-chara(name , loc , Typechara::MONSTER) , is_defeated(false) ,Npower(Npower) , power(power) //, item
-{
-    MonsterType(Mtype);
-}
+Monster::Monster(const std::string name , const std::string &loc , monsterType Mtype , const std::string Npower , const std::vector<Item > items ,int power ) :
+chara(name , loc , Typechara::MONSTER) , is_defeated(false) ,Npower(Npower) , power(power) , Mtype(Mtype) , items(items)
+{}
 
-MonsterType Monster::getMtype()const{
+monsterType Monster::getMtype()const{
     return Mtype;
 }
 std::string Monster::getNpower()const{
@@ -26,9 +24,9 @@ int Monster::getPower()const{
 const std::vector<std::string>& Monster::getTargetLoc()const{
     return targetLoc;
 }
-//const std::vector<item>& Monster::getItems()const{
-// return item;
-//}
+const std::vector<Item>& Monster::getItems()const{
+ return items;
+}
 
 void Monster::setPower(int npower){
     power=npower;
@@ -63,7 +61,7 @@ bool Monster::can_defend()const{
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Dracula::Dracula(const std::string& loc) : 
-Monster("Dracula " , loc , MonsterType::DRACULA , "count dracula" ,/* {} ,*/ 6),
+Monster("Dracula " , loc , monsterType::DRACULA  , "count dracula" , {ItemType::Red , ItemType::Yellow } , 6 ) ,
 coffins_marker(0){
     addTargetLoc("Cave");
     addTargetLoc("Dungeon"); 
@@ -81,14 +79,15 @@ void Dracula::Coffin(){
     }
 }
 bool Dracula::allTakeCoffine()const{
-    if(coffins_marker<4){
+    if(coffins_marker<=4){
         return true;
     }else{
         return false;
     }
 } 
 void Dracula::useSpecialP(){
-
+    setPower(getPower()+2);
+    //افزایش قدرت دراکولا
 }
 bool Dracula::can_defeated()const {
     return allTakeCoffine();
@@ -96,7 +95,7 @@ bool Dracula::can_defeated()const {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Invisidie_man::Invisidie_man(const std::string& loc):
-Monster("Invisidie_man" , loc , MonsterType::INVISIDIE_MAN , "death anghel" , /*{} ,*/ 9) ,itemPlaced(0)
+Monster("Invisidie_man" , loc , monsterType::INVISIDIE_MAN , "death anghel" , {ItemType::Red , ItemType::Yellow } , 9) ,itemPlaced(0)
 {
     addTargetLoc("Inn");
     addTargetLoc("Barn"); 
@@ -109,10 +108,12 @@ int Invisidie_man::getItemPlaced()const{
     return itemPlaced;
 }
 void Invisidie_man::ItemPlaced(){/////////
-    itemPlaced++;
+    if(itemPlaced<5){
+        itemPlaced++;
+    }
 }
 bool Invisidie_man::allTakeItemPlaced()const{
-    if(itemPlaced>5){
+    if(itemPlaced>=5){
         return true;
     }else{
         return false;
@@ -120,7 +121,8 @@ bool Invisidie_man::allTakeItemPlaced()const{
 }
 
 void Invisidie_man::useSpecialP(){
-
+    setPower(getPower()+5);
+        //افزایش قدرت مردنامرئی
 }
 bool Invisidie_man::can_defeated()const{
     return allTakeItemPlaced();
