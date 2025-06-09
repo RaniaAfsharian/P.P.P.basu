@@ -22,7 +22,9 @@ bool Hero::getin_hos()const{
 HeroType Hero::getHType()const{
     return htype;
 }
-
+const std::vector<std::shared_ptr<Item>>& Hero::getItems() const{
+    return items;
+}
 
 void Hero::startTurn(){//تابع در زمان شروع بازی فراخوانی میشود
     if(in_hospital){
@@ -59,17 +61,42 @@ void Hero::move_valliger(std::shared_ptr <chara> villager , const std::string& n
     }
 }
 void Hero::pickup_item( std::vector<std::shared_ptr<Item> > item){
-    if(Act_remaining>0){
+    if(Act_remaining>0 ){
         items.push_back(item);
-        std::cout<<"Item picked:"<<items->getName()<<std::endl;
+        std::cout<<"Item picked:"<<item->getDetails()<<std::endl;
         useAct();
     }
 }
-void Hero::use_Item(const std::string& itemname){
-    auto it=std::find_if(item.begin() , item.end() , [&](auto &item)){
-        
+
+void Hero::use_Item(const std::string& itemname) {
+    // اگر عملیتی باقی نمانده یا آیتم خالی است، برگرد
+    if (Act_remaining <= 0 || itemname.empty()) {
+        return;
     }
+
+    // جستجوی آیتم در لیست
+    for (size_t i = 0; i < items.size(); ++i) {
+        if (items[i]->getName() == itemname) {
+            // استفاده از آیتم
+            if (items[i]->useItem()) {
+                std::cout << "Used item: " << itemname << std::endl;
+                
+                // اگر تعداد آیتم به صفر رسید، از لیست حذف شود
+                if (items[i]->getQuantity() <= 0) {
+                    items.erase(items.begin() + i);
+                }
+                
+                useAct();
+            } else {
+                std::cout << "Item cannot be used: " << itemname << std::endl;
+            }
+            return; // پس از پیدا کردن آیتم، حلقه را پایان بده
+        }
+    }
+
+    std::cout << "Item not found: " << itemname << std::endl;
 }
+
 /*
 void Hero::progress_inTask(std::shared_ptr <Monster> monster){
     if(Act_remaining>0){
@@ -80,8 +107,8 @@ void Hero::progress_inTask(std::shared_ptr <Monster> monster){
 */
 void Hero::defeatMonster(std::shared_ptr <Monster> monster){
     if(Act_remaining>0){  
-        if(monster.can_defeated() && getLoc()==monster->getLoc()){
-            monster.can_defeat();
+        if(monster->can_defeated() && getLoc()==monster->getLoc()){
+            monster->can_defend();
             useAct();
         }
     }
@@ -91,10 +118,10 @@ Mayor::Mayor():Hero("MAYOR" , "Theater" , HeroType::Mayor)
 {}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Ancint::Ancint() : Hero("ANCInt" , "Docks" , HeroType::Ancint)
+Ancient::Ancient() : Hero("ANCIENT" , "Docks" , HeroType::Ancient)
 {}
 
-void Ancint::takeSpcial_item(const std::string itemLoc , std::vector<std::string>& items){
+void Ancient::takeSpcial_item(const std::string& itemLoc , std::vector<std::string>& items){
     if(getAct_rem()>0){
         std::cout<<"Ancint has takeSpcial_item ..."<<std::endl;
     }
