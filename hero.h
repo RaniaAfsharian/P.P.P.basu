@@ -9,7 +9,7 @@
 #include "Item.h"
 
 
-enum class HeroType{Mayor , Ancint};
+enum class HeroType{Mayor , Ancient};
 
 class Hero : public chara {
     private:
@@ -18,7 +18,7 @@ class Hero : public chara {
     int Act_remaining;
     bool in_hospital;
 
-    std::vector<std::shared_ptr<Item> > item;
+    std::vector<std::shared_ptr<Item> > items;
 
     public:
     Hero(const std::string& name , const std::string &loc , HeroType htype );
@@ -27,7 +27,7 @@ class Hero : public chara {
     int getAct_rem()const;
     bool getin_hos()const;
     HeroType getHType()const;
-
+    const std::vector<std::shared_ptr<Item>>& getItems() const;
 
     void startTurn();
     void heal();
@@ -47,10 +47,10 @@ class Mayor : public Hero{
     Mayor();
 };
 
-class Ancint : public Hero{
+class Ancient : public Hero{
     public:
-    Ancint();
+    Ancient();
 
-    void takeSpcial_item(const std::string itemLoc , std::vector<std::string>& items);
+    void takeSpcial_item(const std::string& itemLoc , std::vector<std::string>& items);
 };
 #endif
