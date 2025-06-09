@@ -3,7 +3,7 @@
 
 using namespace std;
 
-// تابع کمکی خصوصی برای اضافه کردن مسیر دوطرفه (فقط برای مقداردهی اولیه)
+// تابع کمکی خصوصی برای اضافه کردن مسیر دوطرفه
 static void addPath(std::map<std::string, std::vector<std::string>>& paths, 
                     std::set<std::string>& locations, 
                     const std::string& from, 
@@ -56,7 +56,7 @@ void Board::initializeBoard() {
     addPath(paths, locations, "Barn", "Inn");
 
 
-    playerPositions[1] = "Docks"; // Archaeologist (بازیکن 1) در Docks
+    playerPositions[1] = "Docks"; // Ancient (بازیکن 1) در Docks
     playerPositions[2] = "Theatre"; // Mayor (بازیکن 2) در Theatre
     // تنظیم موقعیت اولیه هیولا
     monsterPositions[1] = "Castle"; // هیولا 1 در Castle
