@@ -4,8 +4,8 @@
 #include "monster.h"
 #include "Item.h"
 
-Monster::Monster(const std::string name , const std::string &loc , monsterType Mtype , const std::string Npower , const std::vector<Item > items ,int power ) :
-chara(name , loc , Typechara::MONSTER) , is_defeated(false) ,Npower(Npower) , power(power) , Mtype(Mtype) , items(items)
+Monster::Monster(const std::string& name , const std::string &loc , monsterType Mtype , const std::string& Npower , const std::vector<ItemType > itemType , int power) :
+chara(name , loc , Typechara::MONSTER) , is_defeated(false) ,Npower(Npower) , power(power) , Mtype(Mtype) , itemType(itemType)
 {}
 
 monsterType Monster::getMtype()const{
@@ -24,8 +24,8 @@ int Monster::getPower()const{
 const std::vector<std::string>& Monster::getTargetLoc()const{
     return targetLoc;
 }
-const std::vector<Item>& Monster::getItems()const{
- return items;
+const std::vector<ItemType>& Monster::getItemType()const{
+ return itemType;
 }
 
 void Monster::setPower(int npower){
@@ -94,8 +94,8 @@ bool Dracula::can_defeated()const {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Invisidie_man::Invisidie_man(const std::string& loc):
-Monster("Invisidie_man" , loc , monsterType::INVISIDIE_MAN , "death anghel" , {ItemType::Red , ItemType::Yellow } , 9) ,itemPlaced(0)
+Invisible_man::Invisible_man(const std::string& loc):
+Monster("Invisidie_man" , loc , monsterType::INVISIBLE_MAN , "death anghel" , {ItemType::Red , ItemType::Yellow } , 9) ,itemPlaced(0)
 {
     addTargetLoc("Inn");
     addTargetLoc("Barn"); 
@@ -104,15 +104,15 @@ Monster("Invisidie_man" , loc , monsterType::INVISIDIE_MAN , "death anghel" , {I
     addTargetLoc("Mansion");
 }
 
-int Invisidie_man::getItemPlaced()const{
+int Invisible_man::getItemPlaced()const{
     return itemPlaced;
 }
-void Invisidie_man::ItemPlaced(){/////////
+void Invisible_man::ItemPlaced(){/////////
     if(itemPlaced<5){
         itemPlaced++;
     }
 }
-bool Invisidie_man::allTakeItemPlaced()const{
+bool Invisible_man::allTakeItemPlaced()const{
     if(itemPlaced>=5){
         return true;
     }else{
@@ -120,10 +120,10 @@ bool Invisidie_man::allTakeItemPlaced()const{
     }
 }
 
-void Invisidie_man::useSpecialP(){
+void Invisible_man::useSpecialP(){
     setPower(getPower()+5);
         //افزایش قدرت مردنامرئی
 }
-bool Invisidie_man::can_defeated()const{
+bool Invisible_man::can_defeated()const{
     return allTakeItemPlaced();
 }
