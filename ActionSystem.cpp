@@ -1,4 +1,4 @@
-#include "ActionSystem.hpp"
+#include "ActionSystem.h"
 #include <iostream>
 #include <cmath>
 
@@ -109,7 +109,7 @@ bool ActionSystem::performAction(ActionType action) {
         case ActionType::PICK_UP: {
             std::cout << "Picking up all items in current location.\n";
 
-            Item exampleItem{"MedKit"};
+            Item exampleItem{"MedKit", ItemType::Blue, 1, 1};
             currentHero->items.push_back(exampleItem);
 
             heroActionsLeft--;
