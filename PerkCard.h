@@ -2,23 +2,27 @@
 #define PERKCARD_HPP
 #include <string>
 #include <vector>
-using namespace std;
+
+class Person;
 
 class PerkCard {
 private:
-    string name;
+    std::string name;
     int quantity;
 
 public:
-    PerkCard(string name, int quantity);
+    PerkCard(const std::string& name, int quantity);
 
     PerkCard(const PerkCard&) = delete;
     PerkCard& operator=(const PerkCard&) = delete;
 
     bool activate(); 
+    void applyEffect(Person& hero);
     std::string getDetails() const; 
+    
 
-    string getDetails() const;
+    std::string getName() const { return name; }
+    int getQuantity() const { return quantity; }
 };
 
 #endif 
