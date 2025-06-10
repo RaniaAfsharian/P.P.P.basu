@@ -10,23 +10,16 @@
 #include "monster.h"
 #include "Item.h"
 
-enum class ActionType {
-    MOVE,
-    GUIDE,
-    PICK_UP,
-    ADVANCE,
-    DEFEAT,
-    SPECIAL_ACTION
-};
+enum class ActionType {MOVE, GUIDE, PICK_UP, ADVANCE, DEFEAT, SPECIAL_ACTION };
 
 using Location = std::string;
 
-struct Item {
+/*struct Item {
     std::string name;
     ItemType type;
     Item(const std::string& name, ItemType type) : name(name), type(type) {}
     std::string getName() const { return name; }
-};
+};*/
 
 struct Person {
     std::string name;
@@ -40,10 +33,10 @@ struct Person {
         : name(name), location(loc), isHero(hero), isInjured(false), type(type) {}
 };
 
-struct PerkCard {
+/*struct PerkCard {
     std::string description;
     void applyEffect(Person& hero);
-};
+};*/
 
 class ActionSystem {
     std::map<std::string, Person> persons;
