@@ -35,7 +35,7 @@ class Hero : public chara {
     void send_hos();
     void move(const std::string& newLoc);
     void move_valliger(std::shared_ptr <chara> villager , const std::string& newLoc);
-    void pickup_item( std::vector<std::shared_ptr<Item> > item);
+    void pickup_item( std::shared_ptr<Item> item);
     void use_Item(const std::string& itemname);
     void defeatMonster(std::shared_ptr <Monster> monster);
     //void progress_inTask(std::shared_ptr <Monster> monster);
