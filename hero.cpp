@@ -60,7 +60,7 @@ void Hero::move_valliger(std::shared_ptr <chara> villager , const std::string& n
         useAct();
     }
 }
-void Hero::pickup_item( std::vector<std::shared_ptr<Item> > item){
+void Hero::pickup_item( std::shared_ptr<Item>  item){
     if(Act_remaining>0 ){
         items.push_back(item);
         std::cout<<"Item picked:"<<item->getDetails()<<std::endl;
