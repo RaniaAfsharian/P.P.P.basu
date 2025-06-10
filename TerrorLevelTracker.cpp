@@ -1,4 +1,4 @@
-#include "TerrorLevelTracker.hpp"
+#include "TerrorLevelTracker.h"
 #include <iostream>
 
 TerrorLevelTracker::TerrorLevelTracker(int maxLevel)
