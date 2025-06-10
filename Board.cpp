@@ -97,7 +97,7 @@ bool Board::movePlayer(int playerId, const std::string& destination) {
 
 // قرار دادن آیتم در یک مکان
 void Board::placeItem(const std::string& location, const Item& item) {
-    if (locations.find(destination) == locations.end()) {
+    if (locations.find(location) == locations.end()) {
         cout << "The desired location does not exist." << location  << endl;
         return;
     }
