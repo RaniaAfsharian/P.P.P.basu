@@ -15,7 +15,7 @@ vector<PerkCard> createPerkCards() {
     return cards;
 }
 
-PerkCard::PerkCard(string name, int quantity)
+PerkCard::PerkCard(const std::string& name, int quantity)
     : name(name), quantity(quantity) {}
 
 bool PerkCard::activate() {
@@ -23,8 +23,11 @@ bool PerkCard::activate() {
         return false; 
     }
     --quantity; 
-    // اعمال کارت 
     return true; 
+}
+
+void PerkCard::applyEffect(Person& hero) {
+    std::cout << "Special card application: " << name << " for " << hero.name << "\n";
 }
 
 string PerkCard::getDetails() const {
