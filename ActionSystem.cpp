@@ -133,10 +133,10 @@ bool ActionSystem::performAction(ActionType action) {
             }
         }
         case ActionType::SPECIAL_ACTION: {
-            if (currentHero->name == "Archaeologist") {
-                std::cout << "Using Archaeologist's special ability to pick items from neighbor house.\n";
+            if (currentHero->name == "Ancient") {
+                std::cout << "Using Ancient's special ability to pick items from neighbor house.\n";
 
-                Item specialItem{"AncientRelic"};
+                Item specialItem{"AncientRelic" , ItemType::Yellow, 2, 1};
                 currentHero->items.push_back(specialItem);
                 return true;
             } else if (currentHero->name == "Mayor") {
