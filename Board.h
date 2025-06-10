@@ -5,7 +5,7 @@
 #include <map>
 #include <vector>
 #include <set>
-#include "Item.hpp"
+#include "Item.h"
 
 class Board {
 private:
@@ -37,4 +37,4 @@ public:
     const std::map<std::string, std::vector<Item>>& getItems() const { return items; }
 };
 
-#endif // BOARD_HPP
+#endif 
