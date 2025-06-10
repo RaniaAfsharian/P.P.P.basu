@@ -29,7 +29,6 @@ void Board::initializeBoard() {
     addPath(paths, locations, "Camp", "Inn");
     addPath(paths, locations, "Camp", "Precinct");
     addPath(paths, locations, "Camp", "Mansion");
-    addPath(paths, locations, "Camp", "Inn");
     addPath(paths, locations, "Inn", "Mansion");
     addPath(paths, locations, "Precinct", "Mansion");
     addPath(paths, locations, "Theater", "Mansion");
