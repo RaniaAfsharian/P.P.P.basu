@@ -6,9 +6,6 @@
 #include "charactor.h"
 #include "Item.h"
 
-
-#include <string>
-#include <vector>
 #include "character.h"
 #include "Item.h"
 
