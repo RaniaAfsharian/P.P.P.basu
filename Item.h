@@ -27,4 +27,6 @@ public:
     int getQuantity() const { return quantity; }
 };
 
+std::vector<Item> createItems();
+
 #endif // ITEM_HPP
