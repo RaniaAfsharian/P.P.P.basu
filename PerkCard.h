@@ -1,9 +1,9 @@
-#ifndef PERKCARD_HPP
-#define PERKCARD_HPP
+#ifndef PERKCARD_H
+#define PERKCARD_H
+
 #include <string>
 #include <vector>
-
-class Person;
+#include "hero.h"
 
 class PerkCard {
 private:
@@ -16,13 +16,14 @@ public:
     PerkCard(const PerkCard&) = delete;
     PerkCard& operator=(const PerkCard&) = delete;
 
-    bool activate(); 
-    void applyEffect(Person& hero);
-    std::string getDetails() const; 
-    
+    bool activate();
+    void applyEffect(Hero& hero);
+    std::string getDetails() const;
 
     std::string getName() const { return name; }
     int getQuantity() const { return quantity; }
 };
 
-#endif 
+std::vector<PerkCard> createPerkCards();
+
+#endif
