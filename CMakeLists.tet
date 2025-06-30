@@ -1,0 +1,38 @@
+cmake_minimum_required(VERSION 3.10)
+project(HorrorCityGame)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# لیست فایل‌ها
+set(SOURCES
+    main.cpp
+    game.cpp
+    ActionSystem.cpp
+    Board.cpp
+    character.cpp
+    hero.cpp
+    monster.cpp
+    Item.cpp
+    PerkCard.cpp
+    MonsterCard.cpp
+    TerrorLevelTracker.cpp
+)
+
+# لیست فایل‌های هدر
+set(HEADERS
+    game.h
+    ActionSystem.h
+    Board.h
+    character.h
+    hero.h
+    monster.h
+    Item.h
+    PerkCard.h
+    MonsterCard.h
+    TerrorLevelTracker.h
+    Dice.h
+)
+
+# ساخت اجرایی
+add_executable(HorrorCityGame ${SOURCES} ${HEADERS})
