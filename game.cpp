@@ -1,87 +1,123 @@
-#include <bits/stdc++.h>
-
+#include <iostream>
+#include <random>
+#include <algorithm>
+#include <queue>
+#include <map>
 #include "game.h"
 
+using namespace std;
 
-
-Game::Game() : gameTerrorLevelTracker(5), playerindex(0), gameOver(false) {
+Game::Game() : gameTerrorLevelTracker(5), gameActionSystem(gameBoard), playerindex(0), gameOver(false) {
     setGame();
 }
 
+void Game::assignHeroes() {
+    string player1, player2;
+    int time1, time2;
+    cout << "Enter name of player 1: ";
+    cin >> player1;
+    cout << "Enter hours since " << player1 << " last ate garlic: ";
+    cin >> time1;
+    cout << "Enter name of player 2: ";
+    cin >> player2;
+    cout << "Enter hours since " << player2 << " last ate garlic: ";
+    cin >> time2;
+
+    bool player1Starts = time1 < time2;
+    string starter = player1Starts ? player1 : player2;
+    string other = player1Starts ? player2 : player1;
+
+    cout << starter << ", choose your hero (1 for Mayor, 2 for Ancient): ";
+    int choice;
+    cin >> choice;
+
+    if (player1Starts) {
+        if (choice == 1) {
+            gameHero.push_back(make_shared<Mayor>());
+            gameHero.push_back(make_shared<Ancient>());
+        } else {
+            gameHero.push_back(make_shared<Ancient>());
+            gameHero.push_back(make_shared<Mayor>());
+        }
+    } else {
+        if (choice == 1) {
+            gameHero.push_back(make_shared<Mayor>());
+            gameHero.push_back(make_shared<Ancient>());
+        } else {
+            gameHero.push_back(make_shared<Ancient>());
+            gameHero.push_back(make_shared<Mayor>());
+        }
+    }
+    cout << starter << " is " << gameHero[0]->getName() << ", " << other << " is " << gameHero[1]->getName() << endl;
+}
+
 void Game::setGame() {
-    gameHero.push_back(std::make_shared<Mayor>());
-    gameHero.push_back(std::make_shared<Ancient>());
+    assignHeroes();
 
-    gameMonster.push_back(std::make_shared<Invisible_man>("Crypt"));
-    gameMonster.push_back(std::make_shared<Dracula>("Laboratory"));
+    gameMonster.push_back(make_shared<Invisible_man>("Crypt"));
+    gameMonster.push_back(make_shared<Dracula>("Laboratory"));
 
-    gamevillager.push_back(std::make_shared<villager>("Wilbur & Chick", "Inn", "Dungeon"));
-    gamevillager.push_back(std::make_shared<villager>("Maria", "Abbey", "Camp"));
-    gamevillager.push_back(std::make_shared<villager>("Maleva", "Barn", "Shop"));
-    gamevillager.push_back(std::make_shared<villager>("Prof. Pearson", "Tower", "Museum"));
-    gamevillager.push_back(std::make_shared<villager>("Dr. Reed", "Docks", "Camp"));
-    gamevillager.push_back(std::make_shared<villager>("Dr. Cranley", "Mansion", "Precinct"));
-    gamevillager.push_back(std::make_shared<villager>("Frits", "Cave", "Institute"));
+    gamevillager.push_back(make_shared<villager>("Wilbur & Chick", "", "Dungeon"));
+    gamevillager.push_back(make_shared<villager>("Maria", "", "Camp"));
+    gamevillager.push_back(make_shared<villager>("Maleva", "", "Shop"));
+    gamevillager.push_back(make_shared<villager>("Prof. Pearson", "", "Museum"));
+    gamevillager.push_back(make_shared<villager>("Dr. Reed", "", "Camp"));
+    gamevillager.push_back(make_shared<villager>("Dr. Cranley", "", "Precinct"));
+    gamevillager.push_back(make_shared<villager>("Frits", "", "Institute"));
 
     for (const auto& item : createItems()) {
         gameitem.push_back(item);
-        gameBoard.placeItem(item.getName().substr(item.getName().find('_') + 1), item);
+        string loc = item.getName().substr(item.getName().find('_') + 1);
+        if (gameBoard.getLocations().find(loc) != gameBoard.getLocations().end()) {
+            gameBoard.placeItem(loc, item);
+        }
     }
 
-    for(const auto& card : createPerkCards()){
-        gamePerkCard.push_back(card);
+    gamePerkCard = createPerkCards();
+    random_device rd;
+    mt19937 gen(rd());
+    shuffle(gamePerkCard.begin(), gamePerkCard.end(), gen);
+    for (auto& hero : gameHero) {
+        if (!gamePerkCard.empty()) {
+            gameActionSystem.addPerkCard(gamePerkCard.back());
+            gamePerkCard.pop_back();
+        }
     }
+
+    monsterCards = createMonsterCards();
+}
+
+void Game::addLog(const string& log) {
+    gameLogs.push_back(log);
 }
 
 void Game::loop_Game() {
     while (!gameOver) {
         show_Gamestate();
-        show_menu();
-        int choice;
-        std::cin>>choice;
 
-
-        switch(choice){
-            case 1: {
-                for (auto& hero : gameHero) {
-                    heroGame(*hero);
-                    check_win();
-                    if (gameOver) break;
-                }
-
-                if (!gameOver) {
-                    monsterGame();
-                    check_win();
-                }
-                break;
-            }
-            case 2:{
-                savegame_state();
-                break;
-            }
-            case 3:{
-                loadgame_state();
-                break;
-            }
-            case 4:{
-                gameOver=true;
-                std::cout<<"Game exited by player . . . . "<<std::endl;
-                break;
-            }
-            default:{
-                std::cout<<"Invalid choice !!"<<std::endl;
-            }
+        for (auto& hero : gameHero) {
+            heroGame(*hero);
+            check_win();
+            if (gameOver) break;
         }
 
-            if (gameTerrorLevelTracker.isGameOver()) {
-                std::cout << "Game over! The city is overrun by monsters!" <<std::endl;
-            } else {
-                std::cout << "Congratulations! All monsters have been defeated!" <<std::endl;
-            }
+        if (!gameOver) {
+            monsterGame();
+            check_win();
+        }
+    }
+
+    if (gameTerrorLevelTracker.isGameOver()) {
+        cout << "Game over! The city is overrun by monsters!" << endl;
+    } else if (monsterCards.empty()) {
+        cout << "Game over! Monster cards depleted!" << endl;
+    } else {
+        cout << "Congratulations! All monsters have been defeated!" << endl;
     }
 }
+
 void Game::heroGame(Hero& hero) {
-    std::cout << "\n===" << hero.getName() << "'s Turn ===\n";
+    cout << "\n===" << hero.getName() << "'s Turn ===\n";
     hero.startTurn();
     gameActionSystem.startHeroTurn(hero.getName(), hero.getAct_max());
 
@@ -89,47 +125,49 @@ void Game::heroGame(Hero& hero) {
         show_Gamestate();
         int choice;
         bool actSuccess = false;
-        std::string goal;
-        std::cout << "Actions remaining: " << hero.getAct_rem() <<std::endl;
-        std::cout << "Choose action: " <<std::endl;
-        std::cout << "1. Move" <<std::endl;
-        std::cout << "2. Guide Villager" <<std::endl;
-        std::cout << "3. Pick Up Item" <<std::endl;
-        std::cout << "4. Defeat Monster" <<std::endl;
-        std::cout << "5. Use Item" <<std::endl;
-        std::cout << "6. Use Perk card "<<std::endl;
-        std::cout << "7. perform special action"<<std::endl;
-        std::cin >> choice;
+        string goal;
+        cout << "Actions remaining: " << hero.getAct_rem() << endl;
+        cout << "Choose action: " << endl;
+        cout << "1. Move" << endl;
+        cout << "2. Guide Villager" << endl;
+        cout << "3. Pick Up Item" << endl;
+        cout << "4. Advance Mission" << endl;
+        cout << "5. Defeat Monster" << endl;
+        cout << "6. Use Item" << endl;
+        cout << "7. Play Perk Card" << endl;
+        cin >> choice;
 
         switch (choice) {
         case 1: {
-            std::cout << "Available locations: \n";
+            cout << "Available locations: ";
             auto availablePaths = gameBoard.getAvailablePaths(hero.getLoc());
             for (const auto& loc : availablePaths) {
-                std::cout << loc << " ";
+                cout << loc << " ";
             }
-            std::cout << "\nEnter destination: ";
-            std::cin >> goal;
-            if (gameBoard.movePlayer(playerindex + 1, goal)) {
+            cout << "\nEnter destination: ";
+            cin >> goal;
+            if (gameBoard.movePlayer(&hero == gameHero[0].get() ? 1 : 2, goal)) {
                 hero.move(goal);
-                actSuccess = true;
+                actSuccess = gameActionSystem.performAction(ActionType::MOVE, gameMonster);
+                addLog(hero.getName() + " moved to " + goal);
             } else {
-                std::cout << "Invalid move!" <<std::endl;
+                cout << "Invalid move!" << endl;
+                actSuccess = false;
             }
             break;
         }
         case 2: {
-            std::cout << "Villagers in current location: " << std::endl;
+            cout << "Villagers in current location: " << endl;
             for (const auto& villager : gamevillager) {
                 if (villager->getLoc() == hero.getLoc() && !villager->getIs_saved()) {
-                    std::cout << villager->getName() << ", safe location: " << villager->getSafeLoc() <<std::endl;
+                    cout << villager->getName() << ", safe location: " << villager->getSafeLoc() << endl;
                 }
             }
-            std::cout << "Enter villager name to guide: ";
-            std::string villagername;
-            std::cin >> villagername;
+            cout << "Enter villager name to guide: ";
+            string villagername;
+            cin >> villagername;
 
-            std::shared_ptr<villager> foundvill = nullptr;
+            shared_ptr<villager> foundvill = nullptr;
             for (const auto& villager : gamevillager) {
                 if (villager->getName() == villagername) {
                     foundvill = villager;
@@ -137,136 +175,84 @@ void Game::heroGame(Hero& hero) {
                 }
             }
             if (foundvill != nullptr) {
-                std::cout << "Enter destination: ";
-                std::cin >> goal;
-                hero.move_valliger(foundvill, goal);
-                actSuccess = true;
-                if (goal == foundvill->getSafeLoc()) {
-                    foundvill->rescue();
+                cout << "Enter destination: ";
+                cin >> goal;
+                if (gameBoard.getAvailablePaths(foundvill->getLoc()).count(goal)) {
+                    hero.move_valliger(foundvill, goal);
+                    actSuccess = gameActionSystem.performAction(ActionType::GUIDE, gameMonster);
+                    addLog("Guided " + villagername + " to " + goal);
+                    if (goal == foundvill->getSafeLoc()) {
+                        foundvill->rescue();
+                        addLog(villagername + " rescued at " + goal);
+                    }
+                } else {
+                    cout << "Invalid destination for villager!" << endl;
+                    actSuccess = false;
                 }
             } else {
-                std::cout << "Villager not found!" <<std::endl;
+                cout << "Villager not found!" << endl;
+                actSuccess = false;
             }
             break;
         }
         case 3: {
-            std::cout << "Items available at " << hero.getLoc() << ":" <<std::endl;
-            auto items = gameBoard.getItems().find(hero.getLoc());
-            if (items != gameBoard.getItems().end()) {
-                for (const auto& item : items->second) {
-                    std::cout << item.getDetails() <<std::endl;
-                    hero.pickup_item(item);
-                    gameitem.push_back(item);
-                }
-                gameBoard.removeItems(hero.getLoc());
-                actSuccess = true;
-            } else {
-                std::cout << "No items found!" <<std::endl;
-            }
+            actSuccess = gameActionSystem.performAction(ActionType::PICK_UP, gameMonster);
+            addLog(hero.getName() + " picked up items at " + hero.getLoc());
             break;
         }
         case 4: {
-            std::cout << "Monsters in current location: " <<std::endl;
-            for (const auto& monster : gameMonster) {
-                if (monster->getLoc() == hero.getLoc() && !monster->getIs_defeated()) {
-                    std::cout << monster->getName() << ", power: " << monster->getPower() <<std::endl;
-                }
-            }
-            std::cout << "Enter monster name to attack: ";
-            std::string monsterName;
-            std::cin >> monsterName;
-
-            std::shared_ptr<Monster> targetMon = nullptr;
-            for (const auto& monster : gameMonster) {
-                if (monster->getName() == monsterName) {
-                    targetMon = monster;
-                    break;
-                }
-            }
-            if (targetMon != nullptr) {
-                hero.defeatMonster(targetMon);
-                if (targetMon->getIs_defeated()) {
-                    std::cout << "Monster defeated!" <<std::endl;
-                } else {
-                    std::cout << "Failed to defeat the monster! More power or items needed." <<std::endl;
-                }
-                actSuccess = true;
-            } else {
-                std::cout << "Monster not found in this location!" <<std::endl;
-            }
+            actSuccess = gameActionSystem.performAction(ActionType::ADVANCE, gameMonster);
+            addLog(hero.getName() + " advanced mission at " + hero.getLoc());
             break;
         }
         case 5: {
-            std::cout << "Your items: " <<std::endl;
+            cout << "Monsters in current location: " << endl;
+            for (const auto& monster : gameMonster) {
+                if (monster->getLoc() == hero.getLoc() && !monster->getIs_defeated()) {
+                    cout << monster->getName() << ", power: " << monster->getPower() << endl;
+                }
+            }
+            actSuccess = gameActionSystem.performAction(ActionType::DEFEAT, gameMonster);
+            addLog(hero.getName() + " attempted to defeat monster at " + hero.getLoc());
+            break;
+        }
+        case 6: {
+            cout << "Your items: " << endl;
             const auto& items = hero.getItems();
             for (size_t i = 0; i < items.size(); i++) {
-                std::cout << i + 1 << " " << items[i].getDetails() <<std::endl;
+                cout << i + 1 << " " << items[i].getDetails() << endl;
             }
-            std::cout << "Enter item number to use: ";
+            cout << "Enter item number to use: ";
             int itemNum;
-            std::cin >> itemNum;
+            cin >> itemNum;
             if (itemNum > 0 && itemNum <= static_cast<int>(items.size())) {
                 hero.use_Item(items[itemNum - 1].getName());
                 actSuccess = true;
+                addLog(hero.getName() + " used " + items[itemNum - 1].getName());
             } else {
-                std::cout << "Invalid item number!" <<std::endl;
+                cout << "Invalid item number!" << endl;
             }
             break;
         }
-        case 6:{
-            std::cout<<"Available perk cards : \n";
-            for(size_t i=0 ; i < gamePerkCard.size() ; i++ ){
-                std::cout<<i+1<<". "<<gamePerkCard[i].getDetails()<<std::endl;
+        case 7: {
+            cout << "Available perk cards: " << endl;
+            for (size_t i = 0; i < gameActionSystem.getActivePerks().size(); ++i) {
+                cout << i + 1 << ": " << gameActionSystem.getActivePerks()[i].getDetails() << endl;
             }
-            std::cout<<"Enter perk card number to use: \n";
-            int perknum;
-            std::cin>>perknum;
-            if(perknum>0 && perknum <= static_cast<int>(gamePerkCard.size())){
-                if(gamePerkCard[perknum-1].activate()){
-                    gamePerkCard[perknum-1].applyEffect(hero);
-
-                    actSuccess=true;
-                }else{
-                    std::cout<<"No uses left for this perk card!  \n";
-                }
-            }else{
-                std::cout<<"Invalid perk card number ! \n";
-            }
-            break;
-        }
-        case 7:{
-            if(hero.getHType()== HeroType::Ancient){
-                std::cout<<"Using Ancient's special ability to pick up item from neighboring location..\n";
-                std::cout<<"Available neighboring location : \n";
-                auto availablepaths = gameBoard.getAvailablePaths(hero.getLoc());
-                for (const auto& loc : availablepaths){
-                    std::cout<<loc<<"  ";
-                }
-                std::cout<<"\n Enter location to pick up item from : \n";
-                std::cin>>goal;
-                if(availablepaths.find(goal) != availablepaths.end()){
-                    auto items=gameBoard.getItems().find(goal);
-                    if(items != gameBoard.getItems().end()){
-                        for(const auto& item : items->second){
-                            hero.pickup_item(item);
-                            gameitem.push_back(item);
-                            std::cout<<"Pick up item: "<<item.getDetails()<<std::endl; 
-                        }
-                        gameBoard.removeItems(goal);
-                        actSuccess=true;
-                    }else{
-                        std::cout<<"No items found at "<<goal<<std::endl;
-                    }
-                }else{
-                    std::cout<<"Invalid location !! \n"; 
-                }
-            }else{
-                std::cout<<"Only Ancient has a special action ! \n";
+            cout << "Enter perk card number to play: ";
+            int perkNum;
+            cin >> perkNum;
+            if (perkNum > 0 && perkNum <= static_cast<int>(gameActionSystem.getActivePerks().size())) {
+                gameActionSystem.playPerkCard(perkNum - 1);
+                actSuccess = true;
+                addLog(hero.getName() + " played perk card");
+            } else {
+                cout << "Invalid perk card number!" << endl;
             }
             break;
         }
         default:
-            std::cout << "Invalid choice!" <<std::endl;
+            cout << "Invalid choice!" << endl;
         }
 
         if (actSuccess) {
@@ -276,26 +262,76 @@ void Game::heroGame(Hero& hero) {
 }
 
 void Game::monsterGame() {
-    std::cout << "\n=== Monster Turn ===\n";
+    cout << "\n=== Monster Turn ===\n";
+    if (monsterCards.empty()) {
+        gameOver = true;
+        return;
+    }
+
+    auto card = monsterCards.back();
+    monsterCards.pop_back();
+    cout << "Monster card drawn: " << card.name << endl;
+
+    int terrorLevel = gameTerrorLevelTracker.getTerrorLevel();
+    card.applyEvent(gamevillager, terrorLevel, gameBoard.getLocations());
+    card.applyItems(gameBoard.getItemsNonConst(), gameitem);
+    gameTerrorLevelTracker.setTerrorLevel(terrorLevel);
+
     for (auto& monster : gameMonster) {
         if (monster->getIs_defeated()) continue;
         monster->useSpecialP();
+        int terrorLevel = gameTerrorLevelTracker.getTerrorLevel();
+        card.applyMonsterStrike(monster, gameHero, gamevillager, terrorLevel);
+        gameTerrorLevelTracker.setTerrorLevel(terrorLevel);
+        addLog(monster->getName() + " used special power");
 
-        for (auto& villager : gamevillager) {
-            if (!villager->getIs_saved() && villager->getLoc() == monster->getLoc()) {
-                villager->diee();
-                gameTerrorLevelTracker.increaseTerror(1);
-            }
-        }
-        auto availablePaths = gameBoard.getAvailablePaths(monster->getLoc());
-        if (!availablePaths.empty()) {
-            for (const auto& target : monster->getTargetLoc()) {
-                if (availablePaths.find(target) != availablePaths.end()) {
-                    monster->setLoc(target);
-                    std::cout << monster->getName() << " moved to " << target << "!" <<std::endl;
-                    break;
+        std::string nearestTarget;
+        int minDistance = INT_MAX;
+        for (const auto& hero : gameHero) {
+            if (hero->getHealth() > 0) {
+                std::string nextStep = gameBoard.findShortestPath(monster->getLoc(), hero->getLoc());
+                if (!nextStep.empty()) {
+                    int dist = 0;
+                    std::string temp = hero->getLoc();
+                    while (temp != monster->getLoc() && !temp.empty()) {
+                        temp = gameBoard.findShortestPath(monster->getLoc(), temp);
+                        dist++;
+                    }
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        nearestTarget = hero->getLoc();
+                    }
                 }
             }
+        }
+        for (const auto& villager : gamevillager) {
+            if (!villager->getIs_saved() && !villager->getLoc().empty()) {
+                std::string nextStep = gameBoard.findShortestPath(monster->getLoc(), villager->getLoc());
+                if (!nextStep.empty()) {
+                    int dist = 0;
+                    std::string temp = villager->getLoc();
+                    while (temp != monster->getLoc() && !temp.empty()) {
+                        temp = gameBoard.findShortestPath(monster->getLoc(), temp);
+                        dist++;
+                    }
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        nearestTarget = villager->getLoc();
+                    }
+                }
+            }
+        }
+
+        if (!nearestTarget.empty()) {
+            std::string nextStep = gameBoard.findShortestPath(monster->getLoc(), nearestTarget);
+            if (!nextStep.empty() && gameBoard.moveMonster(monster == gameMonster[0] ? 1 : 2, nextStep)) {
+                monster->setLoc(nextStep);
+                addLog(monster->getName() + " moved to " + nextStep);
+            } else {
+                addLog(monster->getName() + " could not move to a valid location.");
+            }
+        } else {
+            addLog(monster->getName() + " found no valid target to move towards.");
         }
     }
 }
@@ -308,197 +344,36 @@ void Game::check_win() {
             break;
         }
     }
-    if (allDefeated || gameTerrorLevelTracker.isGameOver()) {
+    if (allDefeated || gameTerrorLevelTracker.isGameOver() || monsterCards.empty()) {
         gameOver = true;
     }
 }
 
 void Game::show_Gamestate() {
-    std::cout << "\n==== Game State ====\n";
-    gameTerrorLevelTracker.displayTerrorLevel();
-    gameBoard.displayBoard();
-    std::cout << "\nHeroes:\n";
+    cout << "\n==== Game State ====\n";
+    vector<string> heroLocs, monsterLocs, villagerLocs;
+    for (const auto& hero : gameHero) heroLocs.push_back(hero->getLoc());
+    for (const auto& monster : gameMonster) monsterLocs.push_back(monster->getLoc());
+    for (const auto& villager : gamevillager) if (!villager->getLoc().empty()) villagerLocs.push_back(villager->getLoc());
+    gameBoard.displayMap(heroLocs, monsterLocs, villagerLocs);
+    cout << "Logs:\n";
+    for (const auto& log : gameLogs) {
+        cout << "- " << log << endl;
+    }
+    cout << "\nHeroes:\n";
     for (const auto& hero : gameHero) {
-        std::cout << hero->getName() << " at " << hero->getLoc() << ", health: " << hero->getHealth()
-             << ", actions: " << hero->getAct_rem() << "/" << hero->getAct_max() <<std::endl;
+        cout << hero->getName() << " at " << hero->getLoc() << ", health: " << hero->getHealth()
+             << ", actions: " << hero->getAct_rem() << "/" << hero->getAct_max() << endl;
     }
-    std::cout << "\nMonsters:\n";
+    cout << "\nMonsters:\n";
     for (const auto& monster : gameMonster) {
-        std::cout << monster->getName() << " at " << monster->getLoc() << ", power: " << monster->getPower()
-             << ", status: " << (monster->getIs_defeated() ? "defeated" : "active") <<std::endl;
+        cout << monster->getName() << " at " << monster->getLoc() << ", power: " << monster->getPower()
+             << ", status: " << (monster->getIs_defeated() ? "defeated" : "active") << endl;
     }
-    std::cout << "\nVillagers:\n";
+    cout << "\nVillagers:\n";
     for (const auto& villager : gamevillager) {
-        std::cout << villager->getName() << " at " << villager->getLoc() << ", status: "
-             << (villager->getIs_saved() ? "saved" : "in danger") << ", safe location: " << villager->getSafeLoc() <<std::endl;
+        cout << villager->getName() << " at " << villager->getLoc() << ", status: "
+             << (villager->getIs_saved() ? "saved" : "in danger") << ", safe location: " << villager->getSafeLoc() << endl;
     }
-}
-
-void Game::show_menu(){
-    std::cout<<"\n=== Main Menu ===\n";
-    std::cout<<"1. Countinue Game \n";
-    std::cout<<"2. Save Game \n";
-    std::cout<<"3. Load game \n";
-    std::cout<<"4. Exit Game \n";
-    std::cout<<"Enter your choice...\n";
-} 
-
-void Game::savegame_state(){
-    std::ofstream outfile ("game.txt" , std::ios::app);
-
-    if(!outfile){
-        std::cerr<<"ERORR1 for open file\n";
-    }else{
-        outfile<<"TERROR "<<gameTerrorLevelTracker.getTerrorLevel()<<std::endl;//سیو کردن سطح وحشت 
-
-        for(const auto& hero : gameHero){
-            outfile<<"HERO "<<hero->getName()<<"  "<<hero->getLoc()<<"  "<<hero->getHealth()<<"  "
-            <<hero->getAct_rem()<<"  "<<hero->getAct_max()<<"  "<<(hero->getin_hos() ? 1 : 0) <<std::endl;
-
-            for(const auto& item : hero->getItems()){
-            outfile<<"HERO-ITEM "<<hero->getName()<<"  "<<item.getName()<<"  "<<static_cast<int>(item.getType())<<"  "
-            <<item.getEffect()<<"  "<<item.getQuantity()<<std::endl;
-            }
-        }
-
-        for(const auto& monster : gameMonster){
-            outfile<<"MONSTER "<<monster->getName()<<"  "<<monster->getLoc()<<"  "<<monster->getPower()<<"  "
-            <<(monster->getIs_defeated() ? 1 : 0) <<std::endl;
-        }
-
-        for(const auto& villager : gamevillager){
-            outfile<<"VILLAGER "<<villager->getName()<<"  "<<villager->getLoc()<<"  "<<villager->getSafeLoc()<<"  "
-            <<(villager->getIs_saved() ? 1 : 0 ) <<"  "<<villager->getHealth()<<std::endl;
-        }
-
-        for(const auto& locItems : gameBoard.getItems()){
-            for(const auto& item : locItems.second){
-                outfile<<"BOARD_ITEM "<<locItems.first<<"  "<<item.getName()<<"  "<<static_cast<int>(item.getType())<<"  "
-                <<item.getEffect()<<"  "<<item.getQuantity()<<"  "<<std::endl;
-            }
-        }
-
-        for(const auto& card : gamePerkCard){
-            outfile<<"PERK_CARD "<<card.getName()<<"  "<<card.getQuantity()<<"  "<<std::endl;
-        }
-
-        outfile.close();
-        std::cout<<"Game saved successfully . . . \n";
-    }
-}
-
-void Game::loadgame_state(){
-    std::ifstream infile("game.txt");
-
-    if(!infile){
-        std::cerr<<"ERROR to opening file \n";
-    }else{
-        gameHero.clear();
-        gameMonster.clear();
-        gamevillager.clear();
-        gameitem.clear();
-        gamePerkCard.clear();
-
-
-        std::string line;
-        while(getline(infile , line)){
-            std::istringstream iss(line);
-            std::string type;
-            iss>>type;
-
-            if(type=="TERROR"){
-                int level;
-                iss>>level;
-                gameTerrorLevelTracker=TerrorLevelTracker(5);//
-                while(gameTerrorLevelTracker.getTerrorLevel()<level){
-                    gameTerrorLevelTracker.increaseTerror(1);
-                }
-            }else if (type=="HERO"){
-                std::string name , loc;
-                int health , act_rem , act_max , in_hos;
-                iss>>name>>loc>>health>>act_rem>>act_max>>in_hos;
-                std::shared_ptr<Hero> hero;
-                if(name=="Mayor"){
-                    hero=std::make_shared<Mayor>();
-                }else{
-                    hero=std::make_shared<Ancient>();
-                }
-                hero->setLoc(loc);
-                hero->setHealth(health);
-                hero->setAct_rem(act_rem);
-                hero->setAct_max(act_max);
-                hero->setin_hos(in_hos==1);
-
-                gameHero.push_back(hero);
-            }else if(type=="HERO-ITEM"){
-                std::string heroname , itemname ;
-                int typeInt , effect , quantity ; 
-
-                iss>>heroname>>itemname>>typeInt>>effect>>quantity;
-
-                ItemType itemType = static_cast<ItemType> (typeInt);
-                Item item(itemname , itemType , effect , quantity);
-
-                for(auto& hero : gameHero){
-                    if(hero->getName()==heroname){
-                        hero->pickup_item(item);
-                        break;
-                    }
-                }
-            }else if(type=="MONSTER"){
-                std::string name , loc;
-                int power , is_defeated;
-
-                iss>>name>>loc>>power>>is_defeated;
-
-                std::shared_ptr<Monster> monster;
-
-                if(name=="Dracula"){
-                    monster = std::make_shared<Dracula>(loc);
-                }else{
-                    monster = std::make_shared<Invisible_man>(loc);
-                }
-
-                monster->setPower(power);
-                if(is_defeated==1){
-                    monster->defeat();
-                }
-                gameMonster.push_back(monster);
-
-            }else if(type=="VILLAGER"){
-                std::string name ,  loc , safeloc ;
-                int is_saved , health ;
-
-                iss>>name>>loc>>safeloc>>is_saved>>health;
-
-                auto vill=std::make_shared<villager>(name , loc , safeloc);
-                vill->setHealth(health);
-
-                if(is_saved==1){
-                    vill->rescue();
-                }
-
-                gamevillager.push_back(vill);
-            }else if(type=="BOARD_ITEM"){
-                std::string name , loc ;
-                int typeInt , effect , quantity ;
-
-                iss>>loc>>name>>typeInt>>effect>>quantity;
-
-                ItemType itemType=static_cast<ItemType>(typeInt);
-                Item item (name , itemType , effect , quantity );
-                gameBoard.placeItem(loc , item);
-            }else if(type=="PERK_CARD"){
-                std::string name;
-                int quantity;
-                
-                iss>>name>>quantity;
-
-                gamePerkCard.emplace_back(name , quantity);
-            }
-        }
-
-        infile.close();
-        std::cout<<"Game state loaded successfully . . .  \n";
-    }
+    gameLogs.clear();
 }
