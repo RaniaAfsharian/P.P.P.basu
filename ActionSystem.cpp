@@ -1,9 +1,6 @@
 #include "ActionSystem.h"
 
-#include <iostream>
-
-
-ActionSystem::ActionSystem() : board(board){}
+#include <bits/stdc++.h>
 
 ActionSystem::ActionSystem(Board& b) : heroActionsLeft(0), board(b) {}
 
@@ -29,13 +26,13 @@ bool ActionSystem::isNeighbor(const Location& from, const Location& to) {
 void ActionSystem::startHeroTurn(const std::string& heroName, int actionsCount) {
     auto it = persons.find(heroName);
     if (it == persons.end() || it->second->getType() != Typechara::HERO) {
-        std::cout << "Hero not found!" <<std::endl;
+        std::cout << "Hero not found!" << std::endl;
         return;
     }
     currentHero = std::dynamic_pointer_cast<Hero>(it->second);
     heroActionsLeft = actionsCount;
     activePerks.clear();
-    std::cout << "Turn started for hero: " << heroName << ", actions = " << heroActionsLeft <<std::endl;
+    std::cout << "Turn started for hero: " << heroName << ", actions = " << heroActionsLeft << std::endl;
 }
 
 void ActionSystem::addPerkCard(const PerkCard& card) {
@@ -53,7 +50,7 @@ void ActionSystem::playPerkCard(int index) {
 
 bool ActionSystem::performAction(ActionType action, const std::vector<std::shared_ptr<Monster>>& monsters) {
     if (heroActionsLeft <= 0 && action != ActionType::SPECIAL_ACTION) {
-        std::cout << "No actions remaining!" <<std::endl;
+        std::cout << "No actions remaining!" << std::endl;
         return false;
     }
 
@@ -64,13 +61,13 @@ bool ActionSystem::performAction(ActionType action, const std::vector<std::share
         std::cin >> dest;
 
         if (!isNeighbor(currentHero->getLoc(), dest)) {
-            std::cout << "Destination is not adjacent!" <<std::endl;
+            std::cout << "Destination is not adjacent!" << std::endl;
             return false;
         }
 
         movePerson(currentHero, dest);
         currentHero->useAct();
-        std::cout << currentHero->getName() << " moved to " << dest <<std::endl;
+        std::cout << currentHero->getName() << " moved to " << dest << std::endl;
         heroActionsLeft--;
         return true;
     }
@@ -81,11 +78,11 @@ bool ActionSystem::performAction(ActionType action, const std::vector<std::share
 
         auto it = persons.find(villagerName);
         if (it == persons.end() || it->second->getType() != Typechara::VILLAGER) {
-            std::cout << "Invalid villager!" <<std::endl;
+            std::cout << "Invalid villager!" << std::endl;
             return false;
         }
 
-        auto Villager =std::dynamic_pointer_cast<villager>(it->second);
+        auto Villager = std::dynamic_pointer_cast<villager>(it->second);
         bool canMove = false;
         if (Villager->getLoc() == currentHero->getLoc()) {
             std::cout << "Enter neighboring location for villager movement: ";
@@ -105,25 +102,24 @@ bool ActionSystem::performAction(ActionType action, const std::vector<std::share
             canMove = true;
         }
         if (!canMove) {
-            std::cout << "Cannot guide villager in this way!" <<std::endl;
+            std::cout << "Cannot guide villager in this way!" << std::endl;
             return false;
         }
-        std::cout << "Villager " << Villager->getName() << " guided successfully!" <<std::endl;
+        std::cout << "Villager " << Villager->getName() << " guided successfully!" << std::endl;
         heroActionsLeft--;
         return true;
-
     }
     case ActionType::PICK_UP: {
-        std::cout << "Collecting all items at current location..." <<std::endl;
+        std::cout << "Collecting all items at current location..." << std::endl;
         auto items = board.getItems().find(currentHero->getLoc());
         if (items != board.getItems().end()) {
             for (const auto& item : items->second) {
                 currentHero->pickup_item(item);
-                std::cout << "Item " << item.getName() << " picked up!" <<std::endl;
+                std::cout << "Item " << item.getName() << " picked up!" << std::endl;
             }
             board.removeItems(currentHero->getLoc());
         } else {
-            std::cout << "No items found at " << currentHero->getLoc() << "!" <<std::endl;
+            std::cout << "No items found at " << currentHero->getLoc() << "!" << std::endl;
         }
         currentHero->useAct();
         heroActionsLeft--;
@@ -149,9 +145,9 @@ bool ActionSystem::performAction(ActionType action, const std::vector<std::share
             if (currentHero->getLoc() == "Crypt" || currentHero->getLoc() == "Graveyard" ||
                 currentHero->getLoc() == "Cave" || currentHero->getLoc() == "Dungeon") {
                 dracula->Coffin();
-                std::cout << "Dracula's coffin destroyed! (" << dracula->getCoffins_marker() << "/4)" <<std::endl;
+                std::cout << "Dracula's coffin destroyed! (" << dracula->getCoffins_marker() << "/4)" << std::endl;
             } else {
-                std::cout << "You must be in Crypt, Graveyard, Cave, or Dungeon!" <<std::endl;
+                std::cout << "You must be in Crypt, Graveyard, Cave, or Dungeon!" << std::endl;
                 return false;
             }
         } else if (target->getMtype() == monsterType::INVISIBLE_MAN) {
@@ -160,9 +156,9 @@ bool ActionSystem::performAction(ActionType action, const std::vector<std::share
                 currentHero->getLoc() == "Institute" || currentHero->getLoc() == "Laboratory" ||
                 currentHero->getLoc() == "Mansion") {
                 invisible->ItemPlaced();
-                std::cout << "Evidence collected! (" << invisible->getItemPlaced() << "/5)" <<std::endl;
+                std::cout << "Evidence collected! (" << invisible->getItemPlaced() << "/5)" << std::endl;
             } else {
-                std::cout << "You must be in Inn, Barn, Institute, Laboratory, or Mansion!" <<std::endl;
+                std::cout << "You must be in Inn, Barn, Institute, Laboratory, or Mansion!" << std::endl;
                 return false;
             }
         }
@@ -171,7 +167,7 @@ bool ActionSystem::performAction(ActionType action, const std::vector<std::share
         return true;
     }
     case ActionType::DEFEAT: {
-        std::cout << "Attempting to defeat monster at current location..." <<std::endl;
+        std::cout << "Attempting to defeat monster at current location..." << std::endl;
         std::shared_ptr<Monster> targetMon = nullptr;
         for (const auto& p : persons) {
             if (p.second->getType() == Typechara::MONSTER &&
@@ -184,42 +180,42 @@ bool ActionSystem::performAction(ActionType action, const std::vector<std::share
         if (targetMon) {
             currentHero->defeatMonster(targetMon);
             if (targetMon->getIs_defeated()) {
-                std::cout << "Monster defeated!" <<std::endl;
+                std::cout << "Monster defeated!" << std::endl;
             } else {
-                std::cout << "Cannot defeat the monster!" <<std::endl;
+                std::cout << "Cannot defeat the monster!" << std::endl;
             }
             currentHero->useAct();
             heroActionsLeft--;
             return true;
         } else {
-            std::cout << "No monster found at this location!" <<std::endl;
+            std::cout << "No monster found at this location!" << std::endl;
             return false;
         }
     }
     case ActionType::SPECIAL_ACTION: {
         if (currentHero->getHType() == HeroType::Ancient) {
-            std::cout << "Using Ancient's special ability to pick up item from neighboring location..." <<std::endl;
+            std::cout << "Using Ancient's special ability to pick up item from neighboring location..." << std::endl;
             std::cout << "Select location: ";
             Location neighborLoc;
             std::cin >> neighborLoc;
             if (!isNeighbor(currentHero->getLoc(), neighborLoc)) {
-                std::cout << "Selected location is not adjacent!" <<std::endl;
+                std::cout << "Selected location is not adjacent!" << std::endl;
                 return false;
             }
             auto items = board.getItems().find(neighborLoc);
             if (items != board.getItems().end()) {
                 for (const auto& item : items->second) {
                     currentHero->pickup_item(item);
-                    std::cout << "Item " << item.getName() << " picked up from " << neighborLoc << "!" <<std::endl;
+                    std::cout << "Item " << item.getName() << " picked up from " << neighborLoc << "!" << std::endl;
                 }
                 board.removeItems(neighborLoc);
             } else {
-                std::cout << "No items found at " << neighborLoc << "!" <<std::endl;
+                std::cout << "No items found at " << neighborLoc << "!" << std::endl;
             }
             currentHero->useAct();
             return true;
         } else {
-            std::cout << "Mayor has no special ability!" <<std::endl;
+            std::cout << "Mayor has no special ability!" << std::endl;
             return false;
         }
     }
