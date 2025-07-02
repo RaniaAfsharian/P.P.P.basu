@@ -1,8 +1,8 @@
-#ifndef ITEM_HPP
-#define ITEM_HPP
+#ifndef ITEM_H
+#define ITEM_H
 
-#include <string>
-#include <vector>
+
+#include <bits/stdc++.h>
 
 enum class ItemType { Red, Blue, Yellow };
 
@@ -14,19 +14,29 @@ private:
     int quantity;
 
 public:
-    Item(std::string name, ItemType type, int effect, int quantity);
+    Item(const std::string& name, ItemType itemType, int effect, int quantity);
 
-    Item(const Item&) = delete;
-    Item& operator=(const Item&) = delete;
+    Item(const Item&) = default;
+    Item(Item&&) = default;
+    Item& operator=(const Item&) = default;
+    Item& operator=(Item&&) = default;
 
-    bool useItem(); 
-    std::string getDetails() const; 
-    std::string getName() const { return name; }
-    ItemType getType() const { return type; }
-    int getEffect() const { return effect; }
-    int getQuantity() const { return quantity; }
+    bool useItem();
+    std::string getDetails() const;
+    std::string getName() const {
+        return name;
+    }
+    ItemType getType() const {
+        return type;
+    }
+    int getEffect() const {
+        return effect;
+    }
+    int getQuantity() const {
+        return quantity;
+    }
 };
 
 std::vector<Item> createItems();
 
-#endif // ITEM_HPP
+#endif
