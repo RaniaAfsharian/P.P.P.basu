@@ -1,12 +1,9 @@
 #include <bits/stdc++.h>
-
-
 #include "PerkCard.h"
+#include "game.h" 
 
-using namespace std;
-
-vector<PerkCard> createPerkCards() {
-    vector<PerkCard> cards;
+std::vector<PerkCard> createPerkCards() {
+    std::vector<PerkCard> cards;
     cards.emplace_back("Visit from the Detective", 3);
     cards.emplace_back("Break of Dawn", 3);
     cards.emplace_back("Overstock", 4);
@@ -25,12 +22,40 @@ bool PerkCard::activate() {
     return true;
 }
 
-void PerkCard::applyEffect(Hero& hero) {
-    cout << "Applying perk card: " << name << " for " << hero.getName() << endl;
+void PerkCard::applyEffect(Hero& hero, Board& board, std::map<std::string, std::shared_ptr<chara>>& persons, Game& game) {
+    if (!activate()) {
+        std::cout << "No quantity left for perk card: " << name << std::endl;
+        return;
+    }
+    std::cout << "Applying perk card: " << name << " for " << hero.getName() << std::endl;
+    if (name == "Overstock") {
+        std::vector<std::string> loc;
+        for (const auto& pair : board.getItems()) {
+            loc.push_back(pair.first);
+        }
+        if (!loc.empty() && !game.getGameItem().empty()) {
+            int itemIndex = rand() % game.getGameItem().size();
+            int locIndex = rand() % loc.size();
+            board.addItem(loc[locIndex], game.getGameItem()[itemIndex]);
+            std::cout << "Item " << game.getGameItem()[itemIndex].getName() << " placed at " << loc[locIndex] << std::endl;
+            game.getGameItem().erase(game.getGameItem().begin() + itemIndex);
+        }
+    } else if (name == "Repel" || name == "Hurry") {
+        std::cout << "Select destination for " << name << " (must be 2 spaces away): ";
+        std::string dest;
+        std::cin >> dest;
+        auto path = board.findShortestPath(hero.getLoc(), dest);
+        if (path.size() == 3) { // 2 spaces away
+            hero.setLoc(dest);
+            std::cout << hero.getName() << " moved to " << dest << " using " << name << std::endl;
+        } else {
+            std::cout << "Invalid destination for " << name << "!" << std::endl;
+        }
+    }
 }
 
-string PerkCard::getDetails() const {
-    stringstream ss;
+std::string PerkCard::getDetails() const {
+    std::stringstream ss;
     ss << "Perk card: " << name << ", quantity: " << quantity;
     return ss.str();
 }
