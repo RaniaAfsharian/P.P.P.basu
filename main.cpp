@@ -1,10 +1,9 @@
-#include <iostream>
+// File: main.cpp
+#include <bits/stdc++.h>
 #include "game.h"
-
-using namespace std;
 
 int main() {
     Game game;
-    game.loop_Game();
+    game.setGame();
     return 0;
 }
