@@ -1,4 +1,3 @@
-// File: character.h
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
@@ -41,7 +40,7 @@ public:
     std::string getSafeLoc() const { return safeLoc; }
     bool getIs_saved() const { return isSaved; }
     void rescue() { isSaved = true; }
-    void diee() { /* فرضی: مرگ روستایی */ }
+    void diee() { }
 };
 
 #endif
