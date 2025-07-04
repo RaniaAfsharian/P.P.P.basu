@@ -1,44 +1,41 @@
+// File: game.h
 #ifndef GAME_H
 #define GAME_H
 
 #include <bits/stdc++.h>
-#include "ActionSystem.h"
-#include "Board.h"
 #include "character.h"
-#include "Item.h"
 #include "hero.h"
 #include "monster.h"
+#include "Board.h"
+#include "ActionSystem.h"
 #include "PerkCard.h"
 #include "MonsterCard.h"
-#include "TerrorLevelTracker.h"
 
 class Game {
 private:
-    Board gameBoard;
-    TerrorLevelTracker gameTerrorLevelTracker;
-    ActionSystem gameActionSystem;
-    std::vector<PerkCard> gamePerkCard;
-    std::vector<std::shared_ptr<Hero>> gameHero;
+    std::vector<std::shared_ptr<chara>> gameCharacters;
     std::vector<std::shared_ptr<Monster>> gameMonster;
-    std::vector<std::shared_ptr<villager>> gamevillager;
     std::vector<Item> gameitem;
+    std::vector<PerkCard> perkCards;
     std::vector<MonsterCard> monsterCards;
-    std::vector<std::string> gameLogs;
-
-    int playerindex;
-    bool gameOver;
+    ActionSystem actionSystem;
+    Board board;
+    int terrorLevel;
 
 public:
     Game();
-    void assignHeroes();
+    void addHero(std::shared_ptr<Hero> hero);
+    void addVillager(std::shared_ptr<villager> villager);
+    void addMonster(std::shared_ptr<Monster> monster);
     void setGame();
-    void loop_Game();
-    void heroGame(Hero& hero);
     void monsterGame();
     void check_win();
-    void show_Gamestate();
-    void addLog(const std::string& log);
-    const std::vector<PerkCard>& getActivePerks() const { return gamePerkCard; }
+    std::vector<PerkCard> getActivePerks() const;
+    std::vector<Item>& getGameItem();
+    std::vector<std::shared_ptr<chara>>& getGameCharacters() { return gameCharacters; }
+    std::vector<std::shared_ptr<Monster>>& getGameMonster() { return gameMonster; }
+    Board& getBoard() { return board; }
+    int& getTerrorLevel() { return terrorLevel; }
 };
 
 #endif
