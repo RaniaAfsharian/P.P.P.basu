@@ -1,4 +1,3 @@
-// File: hero.h
 #ifndef HERO_H
 #define HERO_H
 
@@ -22,8 +21,8 @@ public:
     std::vector<Item> getItems() const { return items; }
     void pickup_item(const Item& item) { items.push_back(item); }
     void useAct() { if (actions > 0) actions--; }
-    void takeHarm(int damage) { /* فرضی: کاهش سلامت */ }
-    void defeatMonster(std::shared_ptr<Monster> monster) { /* فرضی: منطق شکست هیولا */ }
+    void takeHarm(int damage) { }
+    void defeatMonster(std::shared_ptr<Monster> monster) { }
     int getAct_max() const;
     int getAct_rem() const;
     bool getin_hos() const;
